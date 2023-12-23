@@ -6,8 +6,6 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 
 import java.lang.reflect.Method;
 
-import static java.util.Arrays.stream;
-
 @DisplayNameGeneration(SolutionTester.HackerRankStyledDisplayNameGenerator.class)
 public abstract class SolutionTester {
   protected SolutionInput givenInput(String... givenInput) {
