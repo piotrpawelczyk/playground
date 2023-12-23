@@ -8,8 +8,8 @@ import java.lang.reflect.Method;
 
 import static java.util.Arrays.stream;
 
-@DisplayNameGeneration(SolutionTest.HackerRankStyledDisplayNameGenerator.class)
-public abstract class SolutionTest {
+@DisplayNameGeneration(SolutionTester.HackerRankStyledDisplayNameGenerator.class)
+public abstract class SolutionTester {
   protected SolutionInput givenInput(Object... givenInput) {
     return new SolutionInput(
       getClass().getPackage(),
