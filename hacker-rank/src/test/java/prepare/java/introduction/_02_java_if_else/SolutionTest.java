@@ -11,7 +11,7 @@ class SolutionTest extends SolutionTester {
     "3, Weird",
     "24, Not Weird",
   })
-  void testSolution(int in, String out) {
+  void testSolution(String in, String out) {
     givenInput(in)
       .whenRun()
       .expectsOutput(out);

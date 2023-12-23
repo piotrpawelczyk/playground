@@ -10,11 +10,8 @@ import static java.util.Arrays.stream;
 
 @DisplayNameGeneration(SolutionTester.HackerRankStyledDisplayNameGenerator.class)
 public abstract class SolutionTester {
-  protected SolutionInput givenInput(Object... givenInput) {
-    return new SolutionInput(
-      getClass().getPackage(),
-      stream(givenInput).map(Object::toString).toArray(String[]::new)
-    );
+  protected SolutionInput givenInput(String... givenInput) {
+    return new SolutionInput(getClass().getPackage(), givenInput);
   }
 
   static class HackerRankStyledDisplayNameGenerator implements DisplayNameGenerator {

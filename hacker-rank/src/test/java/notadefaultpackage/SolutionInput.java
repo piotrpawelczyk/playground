@@ -6,6 +6,7 @@ import lombok.val;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -52,37 +53,49 @@ public class SolutionInput {
 
   @SneakyThrows
   private String[][] runAsProcess(Class<?> solutionClass, String[] inputLines) {
-    val jre = ProcessHandle.current().info().commandLine()
-      .map(cmd -> cmd.split("\\s+"))
-      .orElseThrow()[0];
+    val ts = Executors.newFixedThreadPool(4);
 
-    val proc = Runtime.getRuntime().exec(new String[]{
-      jre,
-      "-Dfile.encoding=UTF-8", "-Dsun.stdout.encoding=UTF-8", "-Dsun.stderr.encoding=UTF-8",
-      "-classpath", "./target/test-classes",
-      solutionClass.getCanonicalName()
+    val proc = ts.submit(() -> startProcess(solutionClass)).get();
+
+    ts.submit(new Runnable() {
+      @SneakyThrows
+      @Override
+      public void run() {
+        try {
+          proc.waitFor();
+        } catch (InterruptedException e) {
+          proc.destroyForcibly().waitFor();
+        }
+      }
     });
-
-    val ts = Executors.newFixedThreadPool(3);
     val in = ts.submit(() -> writeLines(inputLines, proc.getOutputStream()));
     val out = ts.submit(() -> readLines(proc.getInputStream()));
     val err = ts.submit(() -> readLines(proc.getErrorStream()));
 
     ts.shutdown();
     if (!ts.awaitTermination(5, SECONDS)) {
-      proc.destroyForcibly();
-      throw new IllegalStateException("Timed out waiting for in/out streams to finish.");
+      throw new IllegalStateException();
     }
-
-    val exit = proc.destroyForcibly().exitValue();
-    if (exit != 0)
-      throw new IllegalStateException("Solution process exited with error code: " + exit + ".");
 
     return new String[][]{in.get(), out.get(), err.get()};
   }
 
   @SneakyThrows
-  private String[] writeLines(String[] inputLines, OutputStream procOutStream) {
+  private static Process startProcess(final Class<?> solutionClass) {
+    val jre = ProcessHandle.current().info().commandLine()
+      .map(cmd -> cmd.split("\\s+"))
+      .orElseThrow()[0];
+
+    return Runtime.getRuntime().exec(new String[]{
+      jre,
+      "-Dfile.encoding=UTF-8", "-Dsun.stdout.encoding=UTF-8", "-Dsun.stderr.encoding=UTF-8",
+      "-classpath", "./target/test-classes",
+      solutionClass.getCanonicalName()
+    });
+  }
+
+  @SneakyThrows
+  private static String[] writeLines(String[] inputLines, OutputStream procOutStream) {
     if (inputLines.length == 0) return new String[0];
 
     val inStream = new OutputStreamWriter(procOutStream);
@@ -97,7 +110,7 @@ public class SolutionInput {
   }
 
   @SneakyThrows
-  private String[] readLines(InputStream outStream) {
+  private static String[] readLines(InputStream outStream) {
     val out = new BufferedReader(new InputStreamReader(outStream));
     val outLines = new ArrayList<String>();
     String l;
