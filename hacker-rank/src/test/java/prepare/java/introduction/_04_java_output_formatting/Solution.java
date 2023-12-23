@@ -2,6 +2,7 @@ package prepare.java.introduction._04_java_output_formatting;
 
 import java.util.Scanner;
 
+// https://www.hackerrank.com/challenges/java-output-formatting/problem?isFullScreen=true
 public class Solution {
   public static void main(String[] args) {
     try (Scanner scanner = new Scanner(System.in)) {

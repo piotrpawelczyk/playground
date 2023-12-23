@@ -2,6 +2,7 @@ package prepare.java.introduction._05_java_loops_I;
 
 import java.util.Scanner;
 
+// https://www.hackerrank.com/challenges/java-loops-i/problem?isFullScreen=true
 public class Solution {
   public static void main(String[] args) {
     try (var scanner = new Scanner(System.in)) {

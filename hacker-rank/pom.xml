@@ -28,4 +28,16 @@
       <version>5.10.0</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/java</directory>
+        <includes>
+          <include>**/input*.txt</include>
+          <include>**/output*.txt</include>
+        </includes>
+      </testResource>
+    </testResources>
+  </build>
 </project>
