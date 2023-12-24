@@ -1,4 +1,4 @@
-package prepare.java.introduction._08_java_end_of_file;
+package prepare.java.introduction._09_java_end_of_file;
 
 import java.util.Scanner;
 

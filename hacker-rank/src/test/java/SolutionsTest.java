@@ -27,7 +27,7 @@ class SolutionsTest {
       .map(root::relativize)
       .map(Path::toString)
       .filter(f -> f.endsWith("Solution.class"))
-      .sorted(reverseOrder())
+      .sorted()
       .map(f -> f.replace(".class", "").replaceAll("/", "."))
       .map(SolutionsTest::clazz)
       .map(c -> Arguments.of(testName(c), c))
@@ -36,7 +36,7 @@ class SolutionsTest {
       );
   }
 
-  @ParameterizedTest(name = "{index}. {0} - Test case {2}")
+  @ParameterizedTest(name = "{0} - Test case {2}")
   @MethodSource("discoverSolutions")
   void testSolutions(
     String solutionName, Class<?> solutionClass, String testCase

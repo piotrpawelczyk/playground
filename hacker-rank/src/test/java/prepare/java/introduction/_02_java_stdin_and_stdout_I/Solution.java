@@ -1,4 +1,4 @@
-package prepare.java.introduction._01_java_stdin_and_stdout_I;
+package prepare.java.introduction._02_java_stdin_and_stdout_I;
 
 import java.util.Scanner;
 

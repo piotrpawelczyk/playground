@@ -1,4 +1,4 @@
-package prepare.java.introduction._05_java_loops_I;
+package prepare.java.introduction._06_java_loops_I;
 
 import java.util.Scanner;
 

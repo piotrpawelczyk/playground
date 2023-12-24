@@ -1,4 +1,4 @@
-package prepare.java.introduction._12_java_currency_formatter;
+package prepare.java.introduction._13_java_currency_formatter;
 
 import java.text.NumberFormat;
 import java.util.Locale;

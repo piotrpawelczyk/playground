@@ -1,4 +1,4 @@
-package prepare.java.introduction._07_java_datatypes;
+package prepare.java.introduction._08_java_datatypes;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

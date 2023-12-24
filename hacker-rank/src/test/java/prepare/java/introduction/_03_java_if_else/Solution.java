@@ -1,4 +1,4 @@
-package prepare.java.introduction._02_java_if_else;
+package prepare.java.introduction._03_java_if_else;
 
 import java.util.Scanner;
 

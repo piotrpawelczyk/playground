@@ -1,4 +1,4 @@
-package prepare.java.introduction._09_java_static_initializer_block;
+package prepare.java.introduction._10_java_static_initializer_block;
 
 import java.util.Scanner;
 

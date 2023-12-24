@@ -1,4 +1,4 @@
-package prepare.java.introduction._04_java_output_formatting;
+package prepare.java.introduction._05_java_output_formatting;
 
 import java.util.Scanner;
 

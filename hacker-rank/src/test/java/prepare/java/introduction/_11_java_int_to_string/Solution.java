@@ -1,4 +1,4 @@
-package prepare.java.introduction._10_java_int_to_string;
+package prepare.java.introduction._11_java_int_to_string;
 
 import java.util.Scanner;
 
