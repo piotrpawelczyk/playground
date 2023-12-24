@@ -19,7 +19,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class SolutionTest {
+class SolutionsTest {
   @SneakyThrows
   private static Stream<Arguments> discoverSolutions() {
     val root = Path.of("./target/test-classes");
@@ -29,7 +29,7 @@ class SolutionTest {
       .filter(f -> f.endsWith("Solution.class"))
       .sorted()
       .map(f -> f.replace(".class", "").replaceAll("/", "."))
-      .map(SolutionTest::clazz)
+      .map(SolutionsTest::clazz)
       .map(c -> Arguments.of(testName(c), c))
       .flatMap(args -> testCases((Class<?>) args.get()[1])
         .map(tc -> Arguments.of(args.get()[0], args.get()[1], tc.get()[0]))
@@ -51,7 +51,7 @@ class SolutionTest {
 
   @ParameterizedTest(name = "{index}. {0} - Test case {2}")
   @MethodSource("discoverSolutions")
-  void testSolution(
+  void testSolutions(
     String solutionName, Class<?> solutionClass, int testCase
   ) {
     val input = solutionClass.getResourceAsStream("input0" + testCase + ".txt");

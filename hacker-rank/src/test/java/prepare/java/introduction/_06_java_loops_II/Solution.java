@@ -1,7 +1,5 @@
 package prepare.java.introduction._06_java_loops_II;
 
-import lombok.val;
-
 import java.util.Scanner;
 
 // https://www.hackerrank.com/challenges/java-loops/problem?isFullScreen=true
