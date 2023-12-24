@@ -1,12 +1,10 @@
 import lombok.SneakyThrows;
 import lombok.val;
-import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.*;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -36,26 +34,13 @@ class SolutionsTest {
       );
   }
 
-  private static Stream<Arguments> testCases(Class<?> solutionClass) {
-    val testFiles = new HashSet<Arguments>();
-    for (var i = 0; solutionClass.getResourceAsStream("input0" + i + ".txt") != null; i++) {
-      testFiles.add(Arguments.of(i));
-    }
-    return testFiles.stream();
-  }
-
-  @SneakyThrows
-  private static Class<?> clazz(String name) {
-    return Class.forName(name);
-  }
-
   @ParameterizedTest(name = "{index}. {0} - Test case {2}")
   @MethodSource("discoverSolutions")
   void testSolutions(
-    String solutionName, Class<?> solutionClass, int testCase
+    String solutionName, Class<?> solutionClass, String testCase
   ) {
-    val input = solutionClass.getResourceAsStream("input0" + testCase + ".txt");
-    val expectedOutput = solutionClass.getResourceAsStream("output0" + testCase + ".txt");
+    val input = solutionClass.getResourceAsStream("input" + testCase + ".txt");
+    val expectedOutput = solutionClass.getResourceAsStream("output" + testCase + ".txt");
 
     val actualOutput = whenRun(
       solutionClass.getPackage(),
@@ -69,35 +54,32 @@ class SolutionsTest {
     System.out.println("Expected Output");
     System.out.println(expectedOutputText);
 
-    assertEquals(
-      expectedOutputText,
-      asText(actualOutput));
+    assertEquals(expectedOutputText, asText(actualOutput));
+  }
+
+  @SneakyThrows
+  private static Stream<Arguments> testCases(Class<?> solutionClass) {
+    val testFiles = new HashSet<Arguments>();
+    for (var i = 0; i <= 99; i++) {
+      val iStr = (i < 10 ? "0" : "") + i;
+      try (val input = solutionClass.getResourceAsStream("input" + iStr + ".txt")) {
+        if (input != null) testFiles.add(Arguments.of(iStr));
+      }
+    }
+    if (testFiles.isEmpty()) testFiles.add(Arguments.of("--not found--"));
+    return testFiles.stream();
+  }
+
+  @SneakyThrows
+  private static Class<?> clazz(String name) {
+    return Class.forName(name);
   }
 
   private static String asText(String[] output) {
     return stream(output).collect(joining(System.lineSeparator()));
   }
 
-  static class HackerRankStyledDisplayNameGenerator implements DisplayNameGenerator {
-    @Override
-    public String generateDisplayNameForClass(final Class<?> testClass) {
-      return testName(testClass);
-    }
-
-    @Override
-    public String generateDisplayNameForNestedClass(final Class<?> nestedClass) {
-      return nestedClass.getName();
-    }
-
-    @Override
-    public String generateDisplayNameForMethod(
-      final Class<?> testClass, final Method testMethod
-    ) {
-      return testMethod.getName();
-    }
-  }
-
-  private static String testName(final Class<?> testClass) {
+  private static String testName(Class<?> testClass) {
     val nameParts = testClass.getCanonicalName().split("\\.");
     StringBuilder name = new StringBuilder();
     for (var i = 0; i < nameParts.length - 1; i++) {
@@ -196,7 +178,7 @@ class SolutionsTest {
   }
 
   @SneakyThrows
-  private static Process startProcess(final Class<?> solutionClass) {
+  private static Process startProcess(Class<?> solutionClass) {
     val jre = ProcessHandle.current().info().commandLine()
       .map(cmd -> cmd.split("\\s+"))
       .orElseThrow()[0];
@@ -220,6 +202,8 @@ class SolutionsTest {
       inStream.flush();
       in.add(l);
     }
+
+    inStream.close();
 
     return in.toArray(String[]::new);
   }
