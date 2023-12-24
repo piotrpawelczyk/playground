@@ -8,11 +8,13 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
+import static java.util.Comparator.reverseOrder;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +27,7 @@ class SolutionsTest {
       .map(root::relativize)
       .map(Path::toString)
       .filter(f -> f.endsWith("Solution.class"))
-      .sorted()
+      .sorted(reverseOrder())
       .map(f -> f.replace(".class", "").replaceAll("/", "."))
       .map(SolutionsTest::clazz)
       .map(c -> Arguments.of(testName(c), c))
