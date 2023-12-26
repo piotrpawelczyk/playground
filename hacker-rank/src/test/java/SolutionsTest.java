@@ -8,15 +8,16 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
-import static java.util.Comparator.reverseOrder;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SolutionsTest {
@@ -118,7 +119,8 @@ class SolutionsTest {
   @SneakyThrows
   public String[] whenRun(Package solutionPackage, String[] inputLines) {
     val solutionClass = Class.forName(solutionPackage.getName() + ".Solution");
-    val inOutErr = runAsProcess(solutionClass, inputLines);
+//    val inOutErr = runAsProcess(solutionClass, inputLines);
+    val inOutErr = runAsThread(solutionClass, inputLines);
 
     if (inOutErr[0].length > 0) {
       System.out.println();
@@ -151,12 +153,62 @@ class SolutionsTest {
   }
 
   @SneakyThrows
+  private String[][] runAsThread(Class<?> solutionClass, String[] inputLines) {
+    val sysIn = System.in;
+    val sysOut = System.out;
+    val sysErr = System.err;
+
+    try {
+      val ts = Executors.newFixedThreadPool(4);
+
+      val inPipe = new PipedInputStream();
+      val inOutputStream = new PipedOutputStream(inPipe);
+      System.setIn(inPipe);
+
+      val outInputStream = new PipedInputStream();
+      val outPipe = new PipedOutputStream(outInputStream);
+      System.setOut(new PrintStream(outPipe));
+
+      val errInputStream = new PipedInputStream();
+      val errPipe = new PipedOutputStream(errInputStream);
+      System.setErr(new PrintStream(errPipe));
+
+      val solution = ts.submit(new Runnable() {
+        @SneakyThrows
+        @Override
+        public void run() {
+          try {
+            solutionClass.getMethod("main", String[].class)
+              .invoke(null, (Object) new String[0]);
+          } finally {
+            outPipe.close();
+            errPipe.close();
+          }
+        }
+      });
+
+      val in = ts.submit(() -> writeLines(inputLines, new PrintStream(inOutputStream)));
+      val out = ts.submit(() -> readLines(outInputStream));
+      val err = ts.submit(() -> readLines(errInputStream));
+
+      ts.shutdown();
+      throwIfAnyErroredOrTimedOut(solution, in, out, err);
+
+      return new String[][]{in.get(), out.get(), err.get()};
+    } finally {
+      System.setIn(sysIn);
+      System.setOut(sysOut);
+      System.setErr(sysErr);
+    }
+  }
+
+  @SneakyThrows
   private String[][] runAsProcess(Class<?> solutionClass, String[] inputLines) {
     val ts = Executors.newFixedThreadPool(4);
 
     val proc = ts.submit(() -> startProcess(solutionClass)).get();
 
-    ts.submit(new Runnable() {
+    val solution = ts.submit(new Runnable() {
       @SneakyThrows
       @Override
       public void run() {
@@ -172,9 +224,7 @@ class SolutionsTest {
     val err = ts.submit(() -> readLines(proc.getErrorStream()));
 
     ts.shutdown();
-    if (!ts.awaitTermination(5, SECONDS)) {
-      throw new IllegalStateException();
-    }
+    throwIfAnyErroredOrTimedOut(solution, in, out, err);
 
     return new String[][]{in.get(), out.get(), err.get()};
   }
@@ -191,6 +241,30 @@ class SolutionsTest {
       "-classpath", "./target/test-classes",
       solutionClass.getCanonicalName()
     });
+  }
+
+  @SneakyThrows
+  private static void throwIfAnyErroredOrTimedOut(Future<?>... fs) {
+    val errored = Stream.of(fs)
+      .map(SolutionsTest::exceptionOrNull)
+      .filter(Objects::nonNull)
+      .collect(toList());
+
+    if (!errored.isEmpty()) {
+      val e = errored.get(0);
+      for (var i = 1; i < errored.size(); i++) e.addSuppressed(errored.get(i));
+
+      throw e;
+    }
+  }
+
+  private static Throwable exceptionOrNull(Future<?> f) {
+    try {
+      f.get(3, SECONDS);
+      return null;
+    } catch (Exception e) {
+      return e;
+    }
   }
 
   @SneakyThrows
