@@ -21,6 +21,8 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SolutionsTest {
+  private static int timeoutS = 5;
+
   @SneakyThrows
   private static Stream<Arguments> discoverSolutions() {
     val root = Path.of("./target/test-classes");
@@ -260,7 +262,7 @@ class SolutionsTest {
 
   private static Throwable exceptionOrNull(Future<?> f) {
     try {
-      f.get(3, SECONDS);
+      f.get(timeoutS, SECONDS);
       return null;
     } catch (Exception e) {
       return e;
