@@ -49,7 +49,9 @@ class SolutionsTest {
 
     val actualOutput = whenRun(
       solutionClass.getPackage(),
-      new BufferedReader(new InputStreamReader(input)).lines().toArray(String[]::new)
+      input == null
+        ? new String[0]
+        : new BufferedReader(new InputStreamReader(input)).lines().toArray(String[]::new)
     );
 
     val expectedOutputText = asText(
@@ -67,7 +69,7 @@ class SolutionsTest {
     val testFiles = new HashSet<Arguments>();
     for (var i = 0; i <= 99; i++) {
       val iStr = (i < 10 ? "0" : "") + i;
-      try (val input = solutionClass.getResourceAsStream("input" + iStr + ".txt")) {
+      try (val input = solutionClass.getResourceAsStream("output" + iStr + ".txt")) {
         if (input != null) testFiles.add(Arguments.of(iStr));
       }
     }
